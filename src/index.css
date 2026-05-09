@@ -1,0 +1,322 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=ZCOOL+XiaoWei&display=swap');
+
+:root {
+  font-family: 'Noto Serif SC', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+
+  --honey-gold: #E8A838;
+  --honey-amber: #D49420;
+  --honey-dark: #B8720C;
+  --honey-light: #F5D78E;
+  --honey-cream: #FFF8E7;
+  --honey-warm: #FFEFC8;
+  --bee-black: #2C2416;
+  --bee-dark: #3D3220;
+  --bee-brown: #6B5B3E;
+  --bee-stripe: #4A3F2A;
+  --hive-bg: #FDF6E3;
+  --hive-dark: #2A2318;
+  --pollen-yellow: #FFE135;
+  --pollen-orange: #FF9F1C;
+  --wax-cream: #FFFDF5;
+  --nectar-pink: #FFB088;
+  --leaf-green: #7CB342;
+  --leaf-light: #AED581;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--hive-bg);
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(232, 168, 56, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 225, 53, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(255, 176, 136, 0.05) 0%, transparent 50%);
+}
+
+.dark body {
+  background-color: var(--hive-dark);
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(232, 168, 56, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 225, 53, 0.05) 0%, transparent 50%);
+}
+
+/* 蜂巢背景纹理 */
+.hive-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' fill='none' stroke='%23E8A838' stroke-opacity='0.06' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 30px 30px;
+}
+
+.dark .hive-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' fill='none' stroke='%23E8A838' stroke-opacity='0.08' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+/* 蜂蜜渐变 */
+.honey-gradient {
+  background: linear-gradient(135deg, #E8A838 0%, #F5D78E 50%, #D49420 100%);
+}
+
+.honey-gradient-soft {
+  background: linear-gradient(135deg, #F5D78E 0%, #FFEFC8 50%, #E8A838 100%);
+}
+
+.honey-gradient-warm {
+  background: linear-gradient(135deg, #FFE135 0%, #E8A838 50%, #D49420 100%);
+}
+
+/* 蜂蜜卡片 */
+.honey-card {
+  background: linear-gradient(145deg, #FFFDF5 0%, #FFF8E7 100%);
+  border: 1px solid rgba(232, 168, 56, 0.2);
+  box-shadow:
+    0 2px 8px rgba(232, 168, 56, 0.1),
+    0 0 0 1px rgba(232, 168, 56, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+}
+
+.dark .honey-card {
+  background: linear-gradient(145deg, #3D3220 0%, #2C2416 100%);
+  border-color: rgba(232, 168, 56, 0.15);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(232, 168, 56, 0.1);
+}
+
+/* 蜂巢按钮 */
+.hive-button {
+  background: linear-gradient(135deg, #E8A838 0%, #D49420 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  box-shadow:
+    0 4px 12px rgba(232, 168, 56, 0.4),
+    0 0 0 1px rgba(212, 148, 32, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.hive-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.hive-button:hover::before {
+  left: 100%;
+}
+
+.hive-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 6px 20px rgba(232, 168, 56, 0.5),
+    0 0 0 1px rgba(212, 148, 32, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.hive-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 蜜蜂条纹装饰 */
+.bee-stripe {
+  background: repeating-linear-gradient(
+    45deg,
+    #E8A838,
+    #E8A838 8px,
+    #2C2416 8px,
+    #2C2416 16px
+  );
+}
+
+/* 飞舞动画 */
+@keyframes beeFly {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(10px, -15px) rotate(5deg);
+  }
+  50% {
+    transform: translate(-5px, -8px) rotate(-3deg);
+  }
+  75% {
+    transform: translate(8px, -20px) rotate(8deg);
+  }
+}
+
+@keyframes beeBuzz {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.05) rotate(-2deg);
+  }
+  50% {
+    transform: scale(0.95) rotate(2deg);
+  }
+  75% {
+    transform: scale(1.02) rotate(-1deg);
+  }
+}
+
+@keyframes wingFlap {
+  0%, 100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.3);
+  }
+}
+
+@keyframes honeyDrip {
+  0% {
+    height: 0;
+    opacity: 1;
+  }
+  80% {
+    height: 20px;
+    opacity: 1;
+  }
+  100% {
+    height: 20px;
+    opacity: 0;
+  }
+}
+
+@keyframes pollenFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(232, 168, 56, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(232, 168, 56, 0.6), 0 0 40px rgba(232, 168, 56, 0.2);
+  }
+}
+
+@keyframes hexPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
+}
+
+.animate-bee-fly {
+  animation: beeFly 3s ease-in-out infinite;
+}
+
+.animate-bee-buzz {
+  animation: beeBuzz 0.3s ease-in-out infinite;
+}
+
+.animate-wing-flap {
+  animation: wingFlap 0.1s ease-in-out infinite;
+}
+
+.animate-honey-drip {
+  animation: honeyDrip 2s ease-in-out infinite;
+}
+
+.animate-pollen-float {
+  animation: pollenFloat 4s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+.animate-hex-pulse {
+  animation: hexPulse 3s ease-in-out infinite;
+}
+
+/* 滚动条隐藏 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@layer utilities {
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* 蜂蜜文字效果 */
+.honey-text {
+  background: linear-gradient(135deg, #E8A838 0%, #D49420 50%, #B8720C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 六边形裁剪 */
+.hex-clip {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* 蜂巢网格 */
+.hive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 4px;
+}
+
+.hive-cell {
+  aspect-ratio: 1;
+  background: rgba(232, 168, 56, 0.1);
+  border-radius: 8px;
+  position: relative;
+}
+
+.hive-cell::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 6px;
+  background: rgba(232, 168, 56, 0.05);
+}
