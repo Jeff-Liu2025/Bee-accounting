@@ -44,16 +44,7 @@ npm install
 npm run dev
 ```
 
----
 
-## 🔑 配置 DeepSeek API Key
-
-1. 前往 [DeepSeek 开放平台](https://platform.deepseek.com/) 注册账号
-2. 新用户免费赠送 **5000 万 tokens**
-3. 在应用内「我的」→「API 设置」中填入你的 API Key
-4. Key 仅保存在本地浏览器，不会上传到任何服务器
-
----
 
 ## 🛠️ 技术栈
 
@@ -65,23 +56,7 @@ npm run dev
 - **AI 能力**: DeepSeek API（自然语言解析、对话助手）
 - **数据存储**: 浏览器 LocalStorage（纯前端，无后端）
 
----
 
-## 📱 截图展示
-
-（此处放 3-5 张核心页面截图）
-
----
-
-## 🏆 参赛信息
-
-本项目参加 **「AI 无限职场」SOLO 挑战赛**，使用 **TRAE SOLO** 完成全部开发。
-
-- **参赛人**: 刘俊锋（Jeff）
-- **学校**: 东莞理工学院
-- **标签**: `Code with SOLO`
-
----
 
 ## 📄 License
 
