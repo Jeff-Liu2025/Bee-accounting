@@ -22,7 +22,7 @@ function PageLoading() {
 
 export default function App() {
   return (
-    <Router>
+    <Router basename="/Bee-accounting">
       <Suspense fallback={<PageLoading />}>
         <Routes>
           <Route element={<Layout />}>
