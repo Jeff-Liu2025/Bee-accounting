@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
-import { useTransactionStore, useBudgetStore } from '@/store';
-import { TransactionItem, AIButton } from '@/components';
+import { Plus, TrendingUp, TrendingDown, Wallet, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { useTransactionStore, useBudgetStore, useSettingsStore } from '@/store';
+import { TransactionItem, AIButton, ConfirmDialog } from '@/components';
 import { formatMoney, getCurrentMonth, getToday } from '@/utils';
 import { cn } from '@/utils';
 import type { Transaction } from '@/types';
@@ -12,15 +12,46 @@ export default function Home() {
   const transactions = useTransactionStore((state) => state.transactions);
   const updateTransaction = useTransactionStore((state) => state.updateTransaction);
   const deleteTransaction = useTransactionStore((state) => state.deleteTransaction);
+  const undoDeleteTransaction = useTransactionStore((state) => state.undoDeleteTransaction);
+  const permanentlyDeleteTransaction = useTransactionStore((state) => state.permanentlyDeleteTransaction);
   const budgets = useBudgetStore((state) => state.budgets);
+  const deleteConfirmation = useSettingsStore((state) => state.deleteConfirmation);
 
-  const todayTransactions = useMemo(() => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState(getToday());
+  const [recentDisplayCount, setRecentDisplayCount] = useState(5);
+
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastTransactionId, setToastTransactionId] = useState<string>('');
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const shiftDate = (days: number) => {
+    const current = new Date(selectedDate);
+    current.setDate(current.getDate() + days);
+    setSelectedDate(current.toISOString().split('T')[0]);
+  };
+
+  const formatDateDisplay = (date: string) => {
     const today = getToday();
-    return transactions.filter((t) => t.date === today);
-  }, [transactions]);
+    if (date === today) return '今日概览';
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    if (date === yesterdayStr) return '昨日概览';
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    if (date === tomorrowStr) return '明日概览';
+    return `${date.slice(5)} 概览`;
+  };
 
-  const todayTotal = useMemo(() => {
-    return todayTransactions.reduce(
+  const selectedDateTransactions = useMemo(() => {
+    return transactions.filter((t) => t.date === selectedDate);
+  }, [transactions, selectedDate]);
+
+  const selectedDateTotal = useMemo(() => {
+    return selectedDateTransactions.reduce(
       (acc, t) => {
         if (t.type === 'income') {
           acc.income += t.amount;
@@ -31,7 +62,7 @@ export default function Home() {
       },
       { income: 0, expense: 0 }
     );
-  }, [todayTransactions]);
+  }, [selectedDateTransactions]);
 
   const monthTotal = useMemo(() => {
     const currentMonth = getCurrentMonth();
@@ -62,16 +93,55 @@ export default function Home() {
     return { used, total, percentage };
   }, [budgets, monthTotal.expense]);
 
-  const recentTransactions = transactions.slice(0, 5);
+  const recentTransactions = useMemo(() => {
+    return transactions.slice(0, recentDisplayCount);
+  }, [transactions, recentDisplayCount]);
+
+  const hasMoreTransactions = transactions.length > recentDisplayCount;
 
   const handleTransactionSave = (updatedTransaction: Transaction) => {
     updateTransaction(updatedTransaction.id, updatedTransaction);
   };
 
-  const handleTransactionDelete = (id: string) => {
-    if (confirm('确定要删除这条记录吗？')) {
-      deleteTransaction(id);
+  const showUndoToast = (id: string) => {
+    setToastTransactionId(id);
+    setToastVisible(true);
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
     }
+    toastTimerRef.current = setTimeout(() => {
+      permanentlyDeleteTransaction(id);
+      setToastVisible(false);
+      setToastTransactionId('');
+    }, 3000);
+  };
+
+  const handleUndoDelete = () => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    undoDeleteTransaction();
+    setToastVisible(false);
+    setToastTransactionId('');
+  };
+
+  const handleTransactionDelete = (id: string) => {
+    if (deleteConfirmation) {
+      setDeleteTargetId(id);
+      setDeleteDialogOpen(true);
+    } else {
+      deleteTransaction(id);
+      showUndoToast(id);
+    }
+  };
+
+  const confirmDelete = () => {
+    if (deleteTargetId) {
+      deleteTransaction(deleteTargetId);
+      showUndoToast(deleteTargetId);
+      setDeleteTargetId(null);
+    }
+    setDeleteDialogOpen(false);
   };
 
   return (
@@ -122,21 +192,52 @@ export default function Home() {
       <div className="px-4 -mt-4">
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-gray-900 dark:text-white">今日概览</h2>
-            <span className="text-xs text-gray-500 dark:text-gray-400">{getCurrentMonth()}</span>
+            <h2 className="font-semibold text-gray-900 dark:text-white">
+              {formatDateDisplay(selectedDate)}
+            </h2>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => shiftDate(-1)}
+                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              </button>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="opacity-0 absolute inset-0 w-full cursor-pointer"
+                />
+                <button className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {selectedDate.slice(5)}
+                </button>
+              </div>
+              <button
+                onClick={() => shiftDate(1)}
+                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
-              <p className="text-xs text-green-600 dark:text-green-400 mb-1">今日收入</p>
+              <p className="text-xs text-green-600 dark:text-green-400 mb-1">
+                {selectedDate === getToday() ? '今日收入' : '收入'}
+              </p>
               <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                {formatMoney(todayTotal.income)}
+                {formatMoney(selectedDateTotal.income)}
               </p>
             </div>
             <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-3">
-              <p className="text-xs text-red-600 dark:text-red-400 mb-1">今日支出</p>
+              <p className="text-xs text-red-600 dark:text-red-400 mb-1">
+                {selectedDate === getToday() ? '今日支出' : '支出'}
+              </p>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">
-                {formatMoney(todayTotal.expense)}
+                {formatMoney(selectedDateTotal.expense)}
               </p>
             </div>
           </div>
@@ -213,6 +314,14 @@ export default function Home() {
                 onDelete={handleTransactionDelete}
               />
             ))}
+            {hasMoreTransactions && (
+              <button
+                onClick={() => setRecentDisplayCount((prev) => prev + 5)}
+                className="w-full py-3 text-sm text-yellow-500 hover:text-yellow-600 font-medium"
+              >
+                查看更多
+              </button>
+            )}
           </div>
         ) : (
           <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl">
@@ -228,6 +337,29 @@ export default function Home() {
       >
         <Plus className="w-7 h-7 text-black" />
       </button>
+
+      <ConfirmDialog
+        isOpen={deleteDialogOpen}
+        title="删除记录"
+        message="确定要删除这条交易记录吗？此操作无法撤销。"
+        confirmText="删除"
+        cancelText="取消"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteDialogOpen(false)}
+      />
+
+      {toastVisible && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-gray-900 dark:bg-gray-700 text-white px-4 py-3 rounded-xl shadow-lg">
+          <span className="text-sm">交易已删除</span>
+          <button
+            onClick={handleUndoDelete}
+            className="text-sm font-medium text-yellow-400 hover:text-yellow-300"
+          >
+            撤销
+          </button>
+        </div>
+      )}
     </div>
   );
 }

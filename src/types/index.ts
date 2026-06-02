@@ -53,6 +53,11 @@ export interface Category {
   type: 'income' | 'expense';
 }
 
+export interface CustomCategory extends Category {
+  isCustom: true;
+  createdAt: string;
+}
+
 export type TransactionType = 'income' | 'expense';
 
 export interface DailyStats {
@@ -65,4 +70,12 @@ export interface CategoryStats {
   category: string;
   amount: number;
   percentage: number;
+}
+
+export interface MerchantMapping {
+  id: string;
+  merchantName: string;
+  category: string;
+  type: 'income' | 'expense';
+  createdAt: string;
 }

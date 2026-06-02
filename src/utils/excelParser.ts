@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import type { Transaction } from '@/types';
+import type { Transaction, MerchantMapping } from '@/types';
 import { generateId } from './index';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/constants';
 import { parseImportDataWithAI, type AIParsedImportRecord } from '@/services';
@@ -12,6 +12,27 @@ export interface ExcelImportResult {
   importedRows: number;
   rawData?: string;
   fileName?: string;
+}
+
+export function applyMerchantMapping(
+  merchantName: string,
+  merchantMappings: MerchantMapping[]
+): { category: string; type: 'income' | 'expense' } | null {
+  if (!merchantName || merchantMappings.length === 0) return null;
+  
+  const normalizedMerchant = merchantName.toLowerCase().trim();
+  
+  for (const mapping of merchantMappings) {
+    const normalizedMapping = mapping.merchantName.toLowerCase().trim();
+    if (normalizedMerchant.includes(normalizedMapping) || normalizedMapping.includes(normalizedMerchant)) {
+      return {
+        category: mapping.category,
+        type: mapping.type,
+      };
+    }
+  }
+  
+  return null;
 }
 
 const categoryMapping: Record<string, string> = {
@@ -292,7 +313,10 @@ function detectDateFormat(firstDateCell: unknown): 'serial' | 'string' {
   return 'string';
 }
 
-function parseWechatBill(jsonData: unknown[][]): {
+function parseWechatBill(
+  jsonData: unknown[][],
+  merchantMappings: MerchantMapping[] = []
+): {
   transactions: Transaction[];
   errors: string[];
   totalRows: number;
@@ -366,7 +390,14 @@ function parseWechatBill(jsonData: unknown[][]): {
       if (product) noteParts.push(product);
       const note = noteParts.join(' - ') || remark || undefined;
 
-      const category = detectCategory(merchant, product, txType);
+      let category: string;
+      const merchantMatch = applyMerchantMapping(merchant, merchantMappings);
+      if (merchantMatch) {
+        category = merchantMatch.category;
+        type = merchantMatch.type;
+      } else {
+        category = detectCategory(merchant, product, txType);
+      }
 
       const transaction: Transaction = {
         id: generateId(),
@@ -391,7 +422,8 @@ function parseWechatBill(jsonData: unknown[][]): {
 
 export async function parseExcelFileWithAI(
   file: File,
-  apiKey: string
+  apiKey: string,
+  merchantMappings: MerchantMapping[] = []
 ): Promise<ExcelImportResult> {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -423,15 +455,18 @@ export async function parseExcelFileWithAI(
           const aiRecords = await parseImportDataWithAI(apiKey, rawData);
 
           if (aiRecords.length > 0) {
-            const transactions: Transaction[] = aiRecords.map((record) => ({
-              id: generateId(),
-              amount: record.amount,
-              type: record.type,
-              category: mapCategoryToId(record.category),
-              note: record.note || '',
-              date: record.date,
-              createdAt: `${record.date}T12:00:00`,
-            }));
+            const transactions: Transaction[] = aiRecords.map((record) => {
+              const merchantMatch = applyMerchantMapping(record.note || '', merchantMappings);
+              return {
+                id: generateId(),
+                amount: record.amount,
+                type: merchantMatch?.type || record.type,
+                category: merchantMatch?.category || mapCategoryToId(record.category),
+                note: record.note || '',
+                date: record.date,
+                createdAt: `${record.date}T12:00:00`,
+              };
+            });
 
             resolve({
               success: true,
@@ -447,7 +482,7 @@ export async function parseExcelFileWithAI(
           console.error('AI解析失败，使用基础解析:', aiError);
         }
 
-        const basicResult = parseWechatBill(jsonData);
+        const basicResult = parseWechatBill(jsonData, merchantMappings);
         resolve({
           success: basicResult.transactions.length > 0,
           transactions: basicResult.transactions,
@@ -484,7 +519,10 @@ export async function parseExcelFileWithAI(
   });
 }
 
-export function parseExcelFile(file: File): Promise<ExcelImportResult> {
+export function parseExcelFile(
+  file: File,
+  merchantMappings: MerchantMapping[] = []
+): Promise<ExcelImportResult> {
   return new Promise((resolve) => {
     const reader = new FileReader();
 
@@ -497,7 +535,7 @@ export function parseExcelFile(file: File): Promise<ExcelImportResult> {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as unknown[][];
 
-        const result = parseWechatBill(jsonData);
+        const result = parseWechatBill(jsonData, merchantMappings);
         resolve({
           success: result.transactions.length > 0,
           transactions: result.transactions,
@@ -532,7 +570,10 @@ export function parseExcelFile(file: File): Promise<ExcelImportResult> {
   });
 }
 
-export function parseCSVFile(file: File): Promise<ExcelImportResult> {
+export function parseCSVFile(
+  file: File,
+  merchantMappings: MerchantMapping[] = []
+): Promise<ExcelImportResult> {
   return new Promise((resolve) => {
     const reader = new FileReader();
 
@@ -639,7 +680,14 @@ export function parseCSVFile(file: File): Promise<ExcelImportResult> {
             if (product) noteParts.push(product);
             const note = noteParts.join(' - ') || undefined;
 
-            const category = detectCategory(merchant, product, txType);
+            let category: string;
+            const merchantMatch = applyMerchantMapping(merchant, merchantMappings);
+            if (merchantMatch) {
+              category = merchantMatch.category;
+              type = merchantMatch.type;
+            } else {
+              category = detectCategory(merchant, product, txType);
+            }
 
             const transaction: Transaction = {
               id: generateId(),
@@ -686,7 +734,8 @@ export function parseCSVFile(file: File): Promise<ExcelImportResult> {
 
 export async function parseCSVFileWithAI(
   file: File,
-  apiKey: string
+  apiKey: string,
+  merchantMappings: MerchantMapping[] = []
 ): Promise<ExcelImportResult> {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -712,15 +761,18 @@ export async function parseCSVFileWithAI(
           const aiRecords = await parseImportDataWithAI(apiKey, content);
 
           if (aiRecords.length > 0) {
-            const transactions: Transaction[] = aiRecords.map((record) => ({
-              id: generateId(),
-              amount: record.amount,
-              type: record.type,
-              category: mapCategoryToId(record.category),
-              note: record.note || '',
-              date: record.date,
-              createdAt: `${record.date}T12:00:00`,
-            }));
+            const transactions: Transaction[] = aiRecords.map((record) => {
+              const merchantMatch = applyMerchantMapping(record.note || '', merchantMappings);
+              return {
+                id: generateId(),
+                amount: record.amount,
+                type: merchantMatch?.type || record.type,
+                category: merchantMatch?.category || mapCategoryToId(record.category),
+                note: record.note || '',
+                date: record.date,
+                createdAt: `${record.date}T12:00:00`,
+              };
+            });
 
             resolve({
               success: true,
@@ -736,7 +788,7 @@ export async function parseCSVFileWithAI(
           console.error('AI解析失败，使用基础解析:', aiError);
         }
 
-        const result = await parseCSVFile(file);
+        const result = await parseCSVFile(file, merchantMappings);
         resolve(result);
       } catch (error) {
         resolve({

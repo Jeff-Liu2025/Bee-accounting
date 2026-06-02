@@ -6,3 +6,6 @@ export { default as CategorySelector } from './CategorySelector';
 export { default as AIChatBubble } from './AIChatBubble';
 export { default as LoadingDots } from './LoadingDots';
 export { default as AIButton } from './AIButton';
+export { default as ConfirmDialog } from './ConfirmDialog';
+export { default as CategoryManager } from './CategoryManager';
+export { default as MerchantManager } from './MerchantManager';

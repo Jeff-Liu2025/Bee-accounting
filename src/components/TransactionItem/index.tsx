@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Transaction } from '@/types';
-import { getCategoryById, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/constants';
+import { getCategoryById, getExpenseCategories, getIncomeCategories } from '@/constants';
 import { formatMoney, getRelativeTime, formatTime, generateId } from '@/utils';
 import { cn } from '@/utils';
+import { useSettingsStore } from '@/store';
 import {
   Utensils,
   Car,
@@ -47,6 +48,7 @@ interface TransactionItemProps {
 }
 
 export default function TransactionItem({ transaction, onClick, editable, onSave, onDelete, showTime }: TransactionItemProps) {
+  const customCategories = useSettingsStore((state) => state.customCategories);
   const [isEditing, setIsEditing] = useState(false);
   const [editAmount, setEditAmount] = useState(transaction.amount.toString());
   const [editType, setEditType] = useState<TransactionType>(transaction.type);
@@ -62,7 +64,7 @@ export default function TransactionItem({ transaction, onClick, editable, onSave
   });
   const [amountError, setAmountError] = useState('');
 
-  const category = getCategoryById(isEditing ? editCategory : transaction.category);
+  const category = getCategoryById(isEditing ? editCategory : transaction.category, customCategories);
   const Icon = category ? iconMap[category.icon] || MoreHorizontal : MoreHorizontal;
 
   const handleStartEdit = (e: React.MouseEvent) => {
@@ -119,7 +121,9 @@ export default function TransactionItem({ transaction, onClick, editable, onSave
   };
 
   if (isEditing && onSave) {
-    const categories = editType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+    const categories = editType === 'expense' 
+      ? getExpenseCategories(customCategories) 
+      : getIncomeCategories(customCategories);
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border-2 border-yellow-400">
         <div className="flex items-center gap-2 mb-3">

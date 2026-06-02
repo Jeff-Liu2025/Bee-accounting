@@ -1,4 +1,4 @@
-import type { Category } from '@/types';
+import type { Category, CustomCategory } from '@/types';
 
 export const EXPENSE_CATEGORIES: Category[] = [
   { id: 'food', name: '餐饮', icon: 'Utensils', type: 'expense' },
@@ -20,12 +20,26 @@ export const INCOME_CATEGORIES: Category[] = [
 
 export const ALL_CATEGORIES = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES];
 
-export const getCategoryById = (id: string): Category | undefined => {
+export const getAllCategories = (customCategories: CustomCategory[] = []): Category[] => {
+  return [...ALL_CATEGORIES, ...customCategories];
+};
+
+export const getExpenseCategories = (customCategories: CustomCategory[] = []): Category[] => {
+  return [...EXPENSE_CATEGORIES, ...customCategories.filter(c => c.type === 'expense')];
+};
+
+export const getIncomeCategories = (customCategories: CustomCategory[] = []): Category[] => {
+  return [...INCOME_CATEGORIES, ...customCategories.filter(c => c.type === 'income')];
+};
+
+export const getCategoryById = (id: string, customCategories: CustomCategory[] = []): Category | undefined => {
+  const custom = customCategories.find(cat => cat.id === id);
+  if (custom) return custom;
   return ALL_CATEGORIES.find(cat => cat.id === id);
 };
 
-export const getCategoryName = (id: string): string => {
-  const category = getCategoryById(id);
+export const getCategoryName = (id: string, customCategories: CustomCategory[] = []): string => {
+  const category = getCategoryById(id, customCategories);
   return category?.name || id;
 };
 

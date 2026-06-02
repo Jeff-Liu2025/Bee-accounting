@@ -31,3 +31,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.vercel
+
+# Development docs and test output
+.trae/
+dogfood-output/
+
+# Data files
+*.xlsx
