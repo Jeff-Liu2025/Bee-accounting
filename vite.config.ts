@@ -33,5 +33,23 @@ export default defineConfig({
       autoThemeTarget: '#root'
     }), 
     tsconfigPaths(),
+    // iOS 微信兼容：将 type="module" 转为普通 script（defer），同时移除 crossorigin
+    {
+      name: 'wechat-compat',
+      transformIndexHtml: {
+        order: 'post',
+        handler(html: string) {
+          return html
+            .replace(
+              /<script type="module" crossorigin src=/g,
+              '<script defer src='
+            )
+            .replace(
+              /<link rel="stylesheet" crossorigin href=/g,
+              '<link rel="stylesheet" href='
+            );
+        },
+      },
+    },
   ],
 })
