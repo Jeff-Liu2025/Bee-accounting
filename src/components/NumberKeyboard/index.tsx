@@ -41,7 +41,7 @@ export default function NumberKeyboard({ value, onChange, onSubmit }: NumberKeyb
           onClick={() => handleKeyPress(key)}
           className={cn(
             'h-14 rounded-xl font-semibold text-xl transition-all duration-150',
-            'active:scale-95',
+            'active:scale-95 touch-feedback',
             key === 'delete'
               ? 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
               : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
@@ -52,7 +52,7 @@ export default function NumberKeyboard({ value, onChange, onSubmit }: NumberKeyb
       ))}
       <button
         onClick={onSubmit}
-        className="col-span-3 h-14 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-lg transition-all duration-150 active:scale-[0.98]"
+        className="col-span-3 h-14 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-lg transition-all duration-150 active:scale-[0.98] touch-feedback"
       >
         确定
       </button>

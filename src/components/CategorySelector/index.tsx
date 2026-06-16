@@ -51,7 +51,7 @@ export default function CategorySelector({ selected, onChange, type }: CategoryS
             key={category.id}
             onClick={() => onChange(category.id)}
             className={cn(
-              'flex flex-col items-center justify-center min-w-[72px] p-3 rounded-xl transition-all duration-200',
+              'flex flex-col items-center justify-center min-w-[72px] p-3 rounded-xl transition-all duration-200 active:scale-95 touch-feedback',
               isSelected
                 ? 'bg-yellow-400 text-black'
                 : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'

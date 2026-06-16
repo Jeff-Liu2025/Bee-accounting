@@ -19,6 +19,7 @@ import { analyzeSpending } from '@/services';
 import { formatMoney, getCurrentMonth, getMonthDays } from '@/utils';
 import { getCategoryName, getExpenseCategories, getIncomeCategories } from '@/constants';
 import { cn } from '@/utils';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import type { Transaction } from '@/types';
 
 ChartJS.register(
@@ -300,6 +301,19 @@ export default function Stats() {
 
   const isCurrentMonth = month === getCurrentMonth();
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+  const { onTouchStart, onTouchMove, onTouchEnd } = useSwipeGesture({
+    onSwipeLeft: () => {
+      if (!isCurrentMonth) {
+        goNextMonth();
+      }
+    },
+    onSwipeRight: () => goPrevMonth(),
+    threshold: 50,
+    disabled: !isMobile,
+  });
+
   const quickMonths = useMemo(() => {
     const months = [];
     const now = new Date();
@@ -351,7 +365,13 @@ export default function Stats() {
         )}
       </div>
 
-      <div ref={monthPickerRef} className="relative mb-4">
+      <div
+        ref={monthPickerRef}
+        className="relative mb-4"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-sm">
           <div className="flex items-center justify-between">
             <button

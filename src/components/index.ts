@@ -9,3 +9,4 @@ export { default as AIButton } from './AIButton';
 export { default as ConfirmDialog } from './ConfirmDialog';
 export { default as CategoryManager } from './CategoryManager';
 export { default as MerchantManager } from './MerchantManager';
+export { Skeleton, CardSkeleton, TransactionItemSkeleton, StatsCardSkeleton, PieChartSkeleton } from './Skeleton';

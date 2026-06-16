@@ -188,9 +188,9 @@ export default function MerchantManager({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl max-h-[80vh] overflow-hidden">
+      <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-t-2xl md:rounded-2xl max-h-[85vh] md:max-h-[80vh] overflow-hidden flex flex-col animate-slide-up md:animate-none">
         <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">商户管理</h2>
           <button
@@ -201,7 +201,7 @@ export default function MerchantManager({
           </button>
         </div>
 
-        <div className="p-4 overflow-y-auto max-h-[calc(80vh-140px)]">
+        <div className="p-4 overflow-y-auto flex-1 min-h-0">
           <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
             <p className="text-xs text-yellow-700 dark:text-yellow-400">
               💡 设置常用商户后，导入账单时会自动匹配分类。也可以应用到已有数据。

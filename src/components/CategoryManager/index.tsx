@@ -73,9 +73,9 @@ export default function CategoryManager({ isOpen, onClose }: CategoryManagerProp
   const incomeCustoms = customCategories.filter(c => c.type === 'income');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl max-h-[80vh] overflow-hidden">
+      <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-t-2xl md:rounded-2xl max-h-[85vh] md:max-h-[80vh] overflow-hidden flex flex-col animate-slide-up md:animate-none">
         <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">分类管理</h2>
           <button
@@ -86,7 +86,7 @@ export default function CategoryManager({ isOpen, onClose }: CategoryManagerProp
           </button>
         </div>
 
-        <div className="p-4 overflow-y-auto max-h-[calc(80vh-140px)]">
+        <div className="p-4 overflow-y-auto flex-1 min-h-0">
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">支出分类</h3>
             <div className="space-y-2">

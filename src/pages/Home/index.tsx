@@ -1,10 +1,11 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, TrendingUp, TrendingDown, Wallet, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useTransactionStore, useBudgetStore, useSettingsStore } from '@/store';
 import { TransactionItem, AIButton, ConfirmDialog } from '@/components';
 import { formatMoney, getCurrentMonth, getToday } from '@/utils';
 import { cn } from '@/utils';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import type { Transaction } from '@/types';
 
 export default function Home() {
@@ -31,6 +32,23 @@ export default function Home() {
     current.setDate(current.getDate() + days);
     setSelectedDate(current.toISOString().split('T')[0]);
   };
+
+  const [pullRefreshLoading, setPullRefreshLoading] = useState(false);
+  const [pullRefreshDistance, setPullRefreshDistance] = useState(0);
+  const pullRef = useRef<HTMLDivElement>(null);
+
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+  const swipeHandlers = useSwipeGesture(isMobile ? {
+    onSwipeLeft: () => shiftDate(1),
+    onSwipeRight: () => shiftDate(-1),
+    threshold: 50,
+  } : {});
+
+  const pullStartY = useRef(0);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const PULL_THRESHOLD = 80;
 
   const formatDateDisplay = (date: string) => {
     const today = getToday();
@@ -146,7 +164,62 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-gradient-to-br from-yellow-400 via-yellow-300 to-orange-400 px-4 pt-12 pb-8 rounded-b-3xl">
+      <div
+        className="bg-gradient-to-br from-yellow-400 via-yellow-300 to-orange-400 px-4 pt-12 pb-8 rounded-b-3xl"
+        onTouchStart={(e) => {
+          if (!isMobile) return;
+          if (window.scrollY === 0) {
+            pullStartY.current = e.touches[0].clientY;
+          }
+        }}
+        onTouchMove={(e) => {
+          if (!isMobile) return;
+          if (pullStartY.current > 0) {
+            const diff = e.touches[0].clientY - pullStartY.current;
+            if (diff > 0) {
+              setPullDistance(Math.min(diff * 0.5, 120));
+            }
+          }
+        }}
+        onTouchEnd={() => {
+          if (!isMobile) return;
+          if (pullDistance >= PULL_THRESHOLD) {
+            setIsRefreshing(true);
+            setPullDistance(0);
+            // 模拟刷新：短暂延迟后重置
+            setTimeout(() => {
+              setIsRefreshing(false);
+            }, 800);
+          } else {
+            setPullDistance(0);
+          }
+          pullStartY.current = 0;
+        }}
+      >
+        {pullDistance > 0 && (
+          <div
+            className="flex items-center justify-center transition-all"
+            style={{ height: pullDistance }}
+          >
+            <div className={`w-8 h-8 rounded-full border-2 border-white/60 flex items-center justify-center ${
+              isRefreshing || pullDistance >= PULL_THRESHOLD ? 'bg-white/20' : ''
+            }`}>
+              {isRefreshing ? (
+                <div className="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin" />
+              ) : (
+                <div
+                  className="w-4 h-4"
+                  style={{
+                    transform: `rotate(${pullDistance * 2}deg)`,
+                    transition: 'none'
+                  }}
+                >
+                  ↓
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-black">蜜蜂记账</h1>
@@ -191,7 +264,10 @@ export default function Home() {
 
       <div className="px-4 -mt-4">
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg">
-          <div className="flex items-center justify-between mb-3">
+          <div
+            className="flex items-center justify-between mb-3 select-none"
+            {...swipeHandlers}
+          >
             <h2 className="font-semibold text-gray-900 dark:text-white">
               {formatDateDisplay(selectedDate)}
             </h2>

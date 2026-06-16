@@ -28,7 +28,7 @@ const Navigation: React.FC = () => {
                 to={item.path}
                 className="relative -mt-6"
               >
-                <div className="w-14 h-14 hive-button rounded-full flex items-center justify-center shadow-hive">
+                <div className="w-14 h-14 hive-button rounded-full flex items-center justify-center shadow-hive active:scale-95 touch-feedback">
                   <PlusCircle size={24} />
                 </div>
                 <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-bee-brown dark:text-gray-400">
@@ -42,7 +42,7 @@ const Navigation: React.FC = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all ${
+              className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all active:scale-95 touch-feedback ${
                 isActive
                   ? 'text-[#E8A838]'
                   : 'text-bee-brown/60 dark:text-gray-500 hover:text-bee-brown dark:hover:text-gray-400'

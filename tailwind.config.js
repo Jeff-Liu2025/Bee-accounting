@@ -65,6 +65,13 @@ export default {
         'pollen-float': 'pollenFloat 4s ease-in-out infinite',
         'glow-pulse': 'glowPulse 2s ease-in-out infinite',
         'hex-pulse': 'hexPulse 3s ease-in-out infinite',
+        'slide-up': 'slideUp 0.3s ease-out',
+      },
+      keyframes: {
+        slideUp: {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
       },
       boxShadow: {
         'honey': '0 2px 8px rgba(232, 168, 56, 0.1), 0 0 0 1px rgba(232, 168, 56, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8)',

@@ -318,3 +318,122 @@ body {
   border-radius: 6px;
   background: rgba(232, 168, 56, 0.05);
 }
+
+/* === 移动端安全区 === */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* 移动端防溢出滚动 */
+@supports (overscroll-behavior: contain) {
+  body {
+    overscroll-behavior: contain;
+  }
+}
+
+/* 移动端平滑滚动 */
+.mobile-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* 触摸设备 active 反馈 — 仅在触摸设备生效 */
+@media (hover: none) and (pointer: coarse) {
+  .touch-feedback:active {
+    transform: scale(0.97);
+    opacity: 0.85;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+  }
+
+  .touch-feedback-light:active {
+    opacity: 0.7;
+    transition: opacity 0.1s ease;
+  }
+}
+
+/* 移动端页面过渡动画 */
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pageOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+@media (max-width: 767px) {
+  .page-transition {
+    animation: pageIn 0.25s ease-out;
+  }
+
+  .page-transition-out {
+    animation: pageOut 0.2s ease-in forwards;
+  }
+}
+
+/* 骨架屏脉冲动画 */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition,
+  .page-transition-out {
+    animation: none;
+  }
+  .skeleton {
+    animation: none;
+  }
+  .touch-feedback:active {
+    transform: none;
+  }
+}
+
+/* 手机端字体缩放 — 利用所有 Tailwind 字号基于 rem 的特性，等比缩小 */
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+}

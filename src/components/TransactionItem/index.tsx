@@ -246,7 +246,7 @@ export default function TransactionItem({ transaction, onClick, editable, onSave
     <div
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl group',
+        'flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl group active:scale-[0.98] touch-feedback',
         'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors',
         onClick && 'cursor-pointer'
       )}
